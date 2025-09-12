@@ -1,7 +1,6 @@
 import { NativeModules, Platform } from 'react-native';
 import type { DownloadManager } from './download';
-import type { UpdateGitOption, UpdateOption } from './type';
-import git from './gits';
+import type { UpdateOption } from './type';
 
 const LINKING_ERROR =
   `The package 'react-native-ota-hot-update' doesn't seem to be linked. Make sure: \n\n` +
@@ -36,7 +35,10 @@ const downloadBundleFile = async (
   const res = await downloadManager
     .config({
       fileCache: Platform.OS === 'android',
-      path: !!downloadManager?.fs?.dirs?.LibraryDir && Platform.OS === 'ios' ? `${downloadManager.fs.dirs.LibraryDir}/${new Date().valueOf()}_hotupdate.zip` : undefined
+      path:
+        !!downloadManager?.fs?.dirs?.LibraryDir && Platform.OS === 'ios'
+          ? `${downloadManager.fs.dirs.LibraryDir}/${new Date().valueOf()}_hotupdate.zip`
+          : undefined,
     })
     .fetch('GET', uri, {
       ...headers,
@@ -64,14 +66,15 @@ function getCurrentVersion(): Promise<string> {
 type Metadata = object | number | string | boolean | null;
 
 function getUpdateMetadata<T extends Metadata = Metadata>(): Promise<T> {
-  return RNhotupdate.getUpdateMetadata(0)
-    .then((metadataString: string | null) => {
+  return RNhotupdate.getUpdateMetadata(0).then(
+    (metadataString: string | null) => {
       try {
         return metadataString ? JSON.parse(metadataString) : null;
       } catch (error) {
         return Promise.reject(new Error('Error parsing metadata'));
       }
-    });
+    }
+  );
 }
 function rollbackToPreviousBundle(): Promise<boolean> {
   return RNhotupdate.rollbackToPreviousBundle(0);
@@ -83,7 +86,9 @@ async function getVersionAsNumber() {
 function setCurrentVersion(version: number): Promise<boolean> {
   return RNhotupdate.setCurrentVersion(version + '');
 }
-function setUpdateMetadata<T extends Metadata = Metadata>(metadata: T): Promise<boolean> {
+function setUpdateMetadata<T extends Metadata = Metadata>(
+  metadata: T
+): Promise<boolean> {
   try {
     const metadataString = JSON.stringify(metadata);
     return RNhotupdate.setUpdateMetadata(metadataString);
@@ -125,7 +130,7 @@ async function downloadBundleUri(
       return installFail(
         option,
         'Please give a bigger version than the current version, the current version now has setted by: ' +
-        currentVersion
+          currentVersion
       );
     }
   }
@@ -162,57 +167,6 @@ async function downloadBundleUri(
     installFail(option, e);
   }
 }
-const checkForGitUpdate = async (options: UpdateGitOption) => {
-  try {
-    if (!options.url || !options.bundlePath) {
-      throw new Error(`url or bundlePath should not be null`);
-    }
-    const [config, branch] = await Promise.all([
-      git.getConfig(),
-      git.getBranchName(),
-    ]);
-    if (branch && config) {
-      const pull = await git.pullUpdate({
-        branch,
-        onProgress: options?.onProgress,
-        folderName: options?.folderName,
-      });
-      if (pull.success) {
-        options?.onPullSuccess?.();
-        if (options?.restartAfterInstall) {
-          setTimeout(() => {
-            resetApp();
-          }, 300);
-        }
-      } else {
-        options?.onPullFailed?.(pull.msg);
-      }
-    } else {
-      const clone = await git.cloneRepo({
-        onProgress: options?.onProgress,
-        folderName: options?.folderName,
-        url: options.url,
-        branch: options?.branch,
-        bundlePath: options.bundlePath,
-      });
-      if (clone.success && clone.bundle) {
-        await setupExactBundlePath(clone.bundle);
-        options?.onCloneSuccess?.();
-        if (options?.restartAfterInstall) {
-          setTimeout(() => {
-            resetApp();
-          }, 300);
-        }
-      } else {
-        options?.onCloneFailed?.(clone.msg);
-      }
-    }
-  } catch (e: any) {
-    options?.onCloneFailed?.(e.toString());
-  } finally {
-    options?.onFinishProgress?.();
-  }
-};
 export default {
   setupBundlePath,
   setupExactBundlePath,
@@ -224,12 +178,4 @@ export default {
   getUpdateMetadata,
   setUpdateMetadata,
   rollbackToPreviousBundle,
-  git: {
-    checkForGitUpdate,
-    ...git,
-    removeGitUpdate: (folder?: string) => {
-      RNhotupdate.setExactBundlePath('');
-      git.removeGitUpdate(folder);
-    },
-  },
 };

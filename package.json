@@ -1,5 +1,5 @@
 {
-  "name": "react-native-ota-hot-update",
+  "name": "rn-updater",
   "version": "2.3.4",
   "description": "Hot update for react native",
   "source": "./src/index.tsx",
@@ -93,7 +93,6 @@
     "@types/react": "^18.2.44"
   },
   "peerDependencies": {
-    "isomorphic-git": "*",
     "react": "*",
     "react-native": "*",
     "react-native-fs": "*"

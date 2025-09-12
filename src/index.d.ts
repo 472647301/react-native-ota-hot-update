@@ -1,23 +1,5 @@
 import type { DownloadManager } from './download';
-import type { UpdateGitOption, UpdateOption } from './type';
-
-export interface GitModule {
-  checkForGitUpdate(options: UpdateGitOption): Promise<void>;
-  removeGitUpdate(folder?: string): void;
-  getBranchName(): Promise<string | null>;
-  pullUpdate(options: {
-    branch: string;
-    folderName?: string;
-    onProgress?: (received: number, total: number) => void;
-  }): Promise<{ success: boolean; msg?: string }>;
-  cloneRepo(options: {
-    url: string;
-    branch?: string;
-    folderName?: string;
-    bundlePath: string;
-    onProgress?: (received: number, total: number) => void;
-  }): Promise<{ success: boolean; bundle?: string; msg?: string }>;
-}
+import type { UpdateOption } from './type';
 
 export interface OtaHotUpdate {
   /**
@@ -68,11 +50,6 @@ export interface OtaHotUpdate {
    * @param version - The version to set.
    */
   setCurrentVersion(version: number): Promise<boolean>;
-
-  /**
-   * Git-related operations.
-   */
-  git: GitModule;
 }
 
 declare const OtaHotUpdate: OtaHotUpdate;
