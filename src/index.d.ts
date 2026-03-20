@@ -1,13 +1,17 @@
 import type { DownloadManager } from './download';
-import type { UpdateOption } from './type';
+import { BundleInfo, UpdateOption } from './type';
+
+// Re-export types for external use
+export type { BundleInfo, UpdateOption } from './type';
 
 export interface OtaHotUpdate {
   /**
    * Set up the path to the downloaded bundle file.
    * @param path - The path to the bundle file.
    * @param extension - Optional extension for the bundle file.
+   * @param version - Optional version number to include in folder name.
    */
-  setupBundlePath(path: string, extension?: string): Promise<boolean>;
+  setupBundlePath(path: string, extension?: string, version?: number): Promise<boolean>;
 
   /**
    * Set up an exact path to the bundle file for the update.
@@ -50,6 +54,25 @@ export interface OtaHotUpdate {
    * @param version - The version to set.
    */
   setCurrentVersion(version: number): Promise<boolean>;
+
+  /**
+   * Get the list of all bundle versions.
+   * @returns Array of bundle information including id, version, date, path, isActive, and metadata.
+   */
+  getBundleList(): Promise<BundleInfo[]>;
+
+  /**
+   * Delete a bundle by its identifier (folder name).
+   * @param id - The bundle identifier (folder name).
+   * @returns True if the bundle was successfully deleted, false otherwise.
+   */
+  deleteBundleById(id: string): Promise<boolean>;
+
+  /**
+   * Clear all bundles from history.
+   * @returns True if all bundles were successfully cleared, false otherwise.
+   */
+  clearAllBundles(): Promise<boolean>;
 }
 
 declare const OtaHotUpdate: OtaHotUpdate;

@@ -1,6 +1,6 @@
 {
-  "name": "rn-updater",
-  "version": "2.3.4",
+  "name": "@eagleway/react-native-ota",
+  "version": "2.4.0",
   "description": "Hot update for react native",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",

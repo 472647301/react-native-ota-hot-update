@@ -1,6 +1,6 @@
 import { NativeModules, Platform } from 'react-native';
 import type { DownloadManager } from './download';
-import type { UpdateOption } from './type';
+import type { BundleInfo, UpdateOption } from './type';
 
 const LINKING_ERROR =
   `The package 'react-native-ota-hot-update' doesn't seem to be linked. Make sure: \n\n` +
@@ -50,8 +50,21 @@ const downloadBundleFile = async (
     });
   return res.path();
 };
-function setupBundlePath(path: string, extension?: string): Promise<boolean> {
-  return RNhotupdate.setupBundlePath(path, extension);
+function setupBundlePath(
+  path: string,
+  extension?: string,
+  version?: number,
+  maxVersions?: number,
+  metadata?: any
+): Promise<boolean> {
+  const metadataString = metadata ? JSON.stringify(metadata) : undefined;
+  return RNhotupdate.setupBundlePath(
+    path,
+    extension,
+    version,
+    maxVersions || 2,
+    metadataString
+  );
 }
 function setupExactBundlePath(path: string): Promise<boolean> {
   return RNhotupdate.setExactBundlePath(path);
@@ -145,8 +158,13 @@ async function downloadBundleUri(
     if (!path) {
       return installFail(option, `Cannot download bundle file: ${path}`);
     }
-
-    const success = await setupBundlePath(path, option?.extensionBundle);
+    const success = await setupBundlePath(
+      path,
+      option?.extensionBundle,
+      version,
+      option?.maxBundleVersions,
+      option?.metadata
+    );
     if (!success) {
       return installFail(option);
     }
@@ -167,6 +185,28 @@ async function downloadBundleUri(
     installFail(option, e);
   }
 }
+function getBundleList(): Promise<BundleInfo[]> {
+  return RNhotupdate.getBundleList(0).then((jsonString: string) => {
+    try {
+      const data = JSON.parse(jsonString);
+      return data.map((item: any) => ({
+        ...item,
+        date: new Date(item.date),
+      }));
+    } catch (error) {
+      return Promise.reject(new Error('Error parsing bundle list'));
+    }
+  });
+}
+
+function deleteBundleById(id: string): Promise<boolean> {
+  return RNhotupdate.deleteBundleById(id);
+}
+
+function clearAllBundles(): Promise<boolean> {
+  return RNhotupdate.clearAllBundles(0);
+}
+
 export default {
   setupBundlePath,
   setupExactBundlePath,
@@ -178,4 +218,7 @@ export default {
   getUpdateMetadata,
   setUpdateMetadata,
   rollbackToPreviousBundle,
+  getBundleList,
+  deleteBundleById,
+  clearAllBundles,
 };
