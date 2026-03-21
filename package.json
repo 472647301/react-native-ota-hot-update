@@ -20,7 +20,9 @@
     },
     "./package.json": "./package.json"
   },
-  "bin": "./cli.js",
+  "bin": {
+    "react-native-ota": "./cli.js"
+  },
   "files": [
     "src",
     "lib",
@@ -78,7 +80,8 @@
   },
   "homepage": "https://github.com/vantuan88291/react-native-ota-hot-update#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "dependencies": {
     "buffer": "^6.0.3"
