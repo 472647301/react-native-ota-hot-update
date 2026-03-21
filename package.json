@@ -6,12 +6,31 @@
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/module/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/typescript/module/src/index.d.ts",
+      "import": "./lib/module/index.js",
+      "require": "./lib/commonjs/index.js",
+      "default": "./lib/commonjs/index.js"
+    },
+    "./config": {
+      "types": "./config.d.ts",
+      "require": "./config.js",
+      "default": "./config.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": "./cli.js",
   "files": [
     "src",
     "lib",
     "android",
     "ios",
     "cpp",
+    "cli",
+    "cli.js",
+    "config.js",
+    "config.d.ts",
     "*.podspec",
     "react-native.config.js",
     "app.plugin.js",
